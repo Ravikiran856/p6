@@ -29,6 +29,27 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Generate Official Android Platform & Gradle Wrapper
+        working-directory: ./packguard_flutter
+        run: |
+          mkdir -p /tmp/packguard_backup
+          cp android/app/src/main/AndroidManifest.xml /tmp/packguard_backup/AndroidManifest.xml || true
+          cp android/app/google-services.json /tmp/packguard_backup/google-services.json || true
+          
+          rm -rf android
+          flutter create . --platforms=android --org=com.packguard --project-name=packguard
+          
+          if [ -f /tmp/packguard_backup/AndroidManifest.xml ]; then
+            cp /tmp/packguard_backup/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+          fi
+          if [ -f /tmp/packguard_backup/google-services.json ]; then
+            cp /tmp/packguard_backup/google-services.json android/app/google-services.json
+          fi
+
+          # Ensure minSdkVersion is at least 23 for Firebase compatibility
+          sed -i 's/minSdkVersion = flutter.minSdkVersion/minSdkVersion = 23/g' android/app/build.gradle || true
+          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/g' android/app/build.gradle || true
+
       - name: Install Dependencies
         working-directory: ./packguard_flutter
         run: flutter pub get
