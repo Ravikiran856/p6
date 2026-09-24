@@ -1,0 +1,74 @@
+[
+  {
+    "package_name": "huggingface-cli",
+    "target_library": "huggingface_hub",
+    "source_research": "Vulcan Cyber (2023)",
+    "description": "Documented hallucinated package recommended by ChatGPT for HuggingFace CLI commands, squatted to test supply-chain risk."
+  },
+  {
+    "package_name": "langchain-core-utils",
+    "target_library": "langchain",
+    "source_research": "AI Hallucination Supply Chain Studies (2024)",
+    "description": "AI-generated helper package hallucinated by LLMs during LangChain prompt engineering chains."
+  },
+  {
+    "package_name": "flask-auth-helper",
+    "target_library": "flask",
+    "source_research": "Datadog Security Labs (2023)",
+    "description": "Hallucinated package commonly emitted by code-generation LLMs for Flask session authentication."
+  },
+  {
+    "package_name": "requests-net",
+    "target_library": "requests",
+    "source_research": "Academic LLM Supply Chain Survey (2024)",
+    "description": "Hallucinated network wrapper for requests frequently observed in code synthesis models."
+  },
+  {
+    "package_name": "pyopenai-tools",
+    "target_library": "openai",
+    "source_research": "AI Package Hallucination Research (2023)",
+    "description": "Hallucinated utility wrapper emitted when prompting LLMs for OpenAI API tool helpers."
+  },
+  {
+    "package_name": "pydantic-validation-helpers",
+    "target_library": "pydantic",
+    "source_research": "Ecosystem Hallucination Analysis (2024)",
+    "description": "Non-existent helper module hallucinated in Pydantic migration and serialization code snippets."
+  },
+  {
+    "package_name": "fastapi-auth-utils",
+    "target_library": "fastapi",
+    "source_research": "PyPI Slopsquatting Tracking (2024)",
+    "description": "Hallucinated package suggested by LLMs for FastAPI JWT dependency injection."
+  },
+  {
+    "package_name": "boto3-helper",
+    "target_library": "boto3",
+    "source_research": "Cloud Security Alliance (2023)",
+    "description": "Frequent LLM hallucination for AWS S3 upload and client shortcuts."
+  },
+  {
+    "package_name": "cryptography-utils",
+    "target_library": "cryptography",
+    "source_research": "Bar Lanyado / Can I Take Over (2023)",
+    "description": "Disclosed AI hallucination vector registered to demonstrate code generation supply-chain hijacking."
+  },
+  {
+    "package_name": "pandas-datareader-ext",
+    "target_library": "pandas",
+    "source_research": "Empirical Study of LLM Hallucinations in PyPI (2024)",
+    "description": "Hallucinated financial data loader for Pandas code generation prompts."
+  },
+  {
+    "package_name": "selenium-driver-manager",
+    "target_library": "selenium",
+    "source_research": "Web Automation LLM Audit (2023)",
+    "description": "Hallucinated webdriver wrapper commonly substituted by AI models for webdriver-manager."
+  },
+  {
+    "package_name": "sqlalchemy-orm-tools",
+    "target_library": "sqlalchemy",
+    "source_research": "Database Code Synthesis Study (2024)",
+    "description": "Hallucinated ORM migration assistant observed in ChatGPT and Copilot suggestions."
+  }
+]
